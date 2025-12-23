@@ -1,0 +1,61 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    container_name: app
+    environment:
+      INFLUX_URL: http://influxdb:8086
+      INFLUX_ORG: demo
+      INFLUX_BUCKET: telemetry
+      INFLUX_TOKEN: local-dev-token
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/postgres
+    ports:
+      - "8000:8000"
+      - "8501:8501"
+    volumes:
+      - .:/app
+    depends_on:
+      influxdb:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: influx
+      DOCKER_INFLUXDB_INIT_PASSWORD: influxpass
+      DOCKER_INFLUXDB_INIT_ORG: demo
+      DOCKER_INFLUXDB_INIT_BUCKET: telemetry
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: local-dev-token
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  influxdb-data:
+  postgres-data:

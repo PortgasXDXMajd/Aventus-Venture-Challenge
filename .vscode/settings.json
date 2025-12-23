@@ -1,0 +1,16 @@
+{
+    "python.defaultInterpreterPath": "${workspaceFolder}/app/.venv/bin/python",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/app"
+    ],
+    "python.analysis.typeCheckingMode": "basic",
+    "editor.semanticHighlighting.enabled": true,
+    "cSpell.words": [
+        "asyncpg",
+        "dotenv",
+        "fastapi",
+        "httpx",
+        "pydantic",
+        "uvicorn"
+    ]
+}
